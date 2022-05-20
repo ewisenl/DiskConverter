@@ -226,7 +226,11 @@ namespace DiskConverter
             roboCMD.OnCommandCompleted += copyFileFinishHandler;
             await roboCMD.Start();
 
-
+            progressBar1.Visible = true;
+            progressBar2.Visible = true;
+            progressBar3.Visible = true;
+            progressBar4.Visible = true;
+            progressBar5.Visible = true;
 
 
 
@@ -239,7 +243,7 @@ namespace DiskConverter
             var bag = new System.Collections.Concurrent.ConcurrentBag<string>(movque);
              await bag.ParallelForEachAsync (async item =>
             {
-                
+                Thread.Sleep(100);
 
 
                 int mytrem = tremolo % 5;
