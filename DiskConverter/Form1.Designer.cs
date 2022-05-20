@@ -54,6 +54,7 @@
             this.currentFil = new System.Windows.Forms.Label();
             this.currentproglabel = new System.Windows.Forms.Label();
             this.curdirlabel = new System.Windows.Forms.Label();
+            this.totaalwordlabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // inputbutton
@@ -97,9 +98,9 @@
             // convertbutton
             // 
             this.convertbutton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.convertbutton.Location = new System.Drawing.Point(335, 60);
+            this.convertbutton.Location = new System.Drawing.Point(291, 176);
             this.convertbutton.Name = "convertbutton";
-            this.convertbutton.Size = new System.Drawing.Size(94, 29);
+            this.convertbutton.Size = new System.Drawing.Size(165, 29);
             this.convertbutton.TabIndex = 4;
             this.convertbutton.Text = "Convert!";
             this.convertbutton.UseVisualStyleBackColor = true;
@@ -108,7 +109,7 @@
             // 
             // donebutton
             // 
-            this.donebutton.Location = new System.Drawing.Point(335, 409);
+            this.donebutton.Location = new System.Drawing.Point(325, 409);
             this.donebutton.Name = "donebutton";
             this.donebutton.Size = new System.Drawing.Size(94, 29);
             this.donebutton.TabIndex = 6;
@@ -253,6 +254,7 @@
             this.totalBar.Name = "totalBar";
             this.totalBar.Size = new System.Drawing.Size(677, 29);
             this.totalBar.TabIndex = 23;
+            this.totalBar.Visible = false;
             // 
             // totalproglabel
             // 
@@ -287,11 +289,23 @@
             this.curdirlabel.Size = new System.Drawing.Size(0, 20);
             this.curdirlabel.TabIndex = 27;
             // 
+            // totaalwordlabel
+            // 
+            this.totaalwordlabel.AutoSize = true;
+            this.totaalwordlabel.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.totaalwordlabel.Location = new System.Drawing.Point(348, 156);
+            this.totaalwordlabel.Name = "totaalwordlabel";
+            this.totaalwordlabel.Size = new System.Drawing.Size(46, 17);
+            this.totaalwordlabel.TabIndex = 28;
+            this.totaalwordlabel.Text = "Totaal";
+            this.totaalwordlabel.Visible = false;
+            // 
             // windowcase
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.totaalwordlabel);
             this.Controls.Add(this.curdirlabel);
             this.Controls.Add(this.currentproglabel);
             this.Controls.Add(this.currentFil);
@@ -354,5 +368,6 @@
         private Label currentFil;
         private Label currentproglabel;
         private Label curdirlabel;
+        private Label totaalwordlabel;
     }
 }

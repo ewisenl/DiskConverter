@@ -52,13 +52,13 @@ namespace DiskConverter
             return true;
         }
 
-        private void changeProgress(ProgressBar requestedBar, int value)
+        private void changeProgress(ProgressBar requestedBar, int value, bool visswitch, bool showhide)
         {
             if (value > 100) { value = 100; };
             if (value < 0) { value = 0; };
             if (requestedBar.InvokeRequired)
             {
-                requestedBar.BeginInvoke((MethodInvoker)delegate () { requestedBar.Value = value; ; });
+                requestedBar.BeginInvoke((MethodInvoker)delegate () { if (visswitch) { requestedBar.Visible = showhide; } else { requestedBar.Value = value; }; });
             }
             else
             {
@@ -95,7 +95,8 @@ namespace DiskConverter
                     if (fi.Extension == ".bin") { continue; };
                     if (fi.Extension == ".BIN") { continue; };
                     if (fi.FullName.IndexOf("$RECYCLE.BIN") > -1) { continue; };
-                    if (File.Exists(fi.FullName.Replace(source,target))) { continue; };
+                if (fi.FullName.IndexOf(" Volume ") > -1) { continue; };
+                if (File.Exists(fi.FullName.Replace(source,target))) { continue; };
                 
                 
 
@@ -164,14 +165,14 @@ namespace DiskConverter
 
             double totalprocent = ((double)donebytes / (double)total) * 100;
             changeLabel(totalproglabel, totalprocent.ToString("0.00", new System.Globalization.CultureInfo("en-US", false)) + "%");
-            changeProgress(totalBar, (int)totalprocent);
+            changeProgress(totalBar, (int)totalprocent,false,false);
 
 
         }
 
         private void copyFileFinishHandler(object sender, RoboCommandCompletedEventArgs args)
         {
-            donebytes = args.Results.BytesStatistic.Total;
+            
             changeLabel(currentFil, "Converting MOV files...");
         }
 
@@ -185,12 +186,8 @@ namespace DiskConverter
             bool[] bezet = new bool[5] { false, false, false, false, false };
             changeLabel(currentFil, "Copying folders and small files...");
 
-
-            progressBar1.Visible = true;
-            progressBar2.Visible = true;
-            progressBar3.Visible = true;
-            progressBar4.Visible = true;
-            progressBar5.Visible = true;
+            
+            
             totalBar.Visible = true;
             totalproglabel.Visible = true;
         
@@ -198,8 +195,7 @@ namespace DiskConverter
             List<string> bigfiles = new List<string>(Directory.GetFiles(source, "*.*",SearchOption.AllDirectories).SkipWhile(name=> 
                 Path.GetExtension(name)==".pek" ||
                 Path.GetExtension(name) == ".BIN" ||
-                Path.GetExtension(name) == ".pek" ||
-                Path.GetExtension(name) == ""
+                Path.GetExtension(name) == ".pek" 
                 ).ToArray());
             Thread.Sleep(300);
             await foreach (string file in bigfiles) { total += new FileInfo(file).Length; };
@@ -217,6 +213,7 @@ namespace DiskConverter
             roboCMD.CopyOptions = copt;
             roboCMD.CopyOptions.CopySubdirectoriesIncludingEmpty = true;
             roboCMD.SelectionOptions.ExcludeFiles = "*.mov *.pek *.BIN $*.* .*.*";
+            roboCMD.SelectionOptions.ExcludeAttributes = "h";
             roboCMD.OnFileProcessed += currentCopyHanler;
             roboCMD.OnCopyProgressChanged += copyprogresHandler;
             roboCMD.OnCommandCompleted += copyFileFinishHandler;
@@ -258,6 +255,7 @@ namespace DiskConverter
                 };
                 
                 changeLabel(filelabel, item);
+                changeProgress(progressbarnow,0, true, true);
                 
                 IMediaInfo mediaInfo = await FFmpeg.GetMediaInfo(item);
 
@@ -265,13 +263,13 @@ namespace DiskConverter
                         ?.SetCodec(VideoCodec.h264);
                     IStream audioStream = (IStream)mediaInfo.AudioStreams.FirstOrDefault()
                         ?.SetCodec(AudioCodec.aac);
-                IConversion conversion = convertMov(item, audioStream, videoStream);
+                IConversion conversion =  convertMov(item, audioStream, videoStream);
 
                 conversion.OnProgress += (sender, args) =>
                 {
                     var percent = (int)(Math.Round(args.Duration.TotalSeconds / args.TotalLength.TotalSeconds, 2) * 100);
                     changeLabel(proglabel, percent.ToString() + "%");
-                    changeProgress(progressbarnow, (int)percent);
+                    changeProgress(progressbarnow, (int)percent,false,false);
                 };
 
 
@@ -284,18 +282,18 @@ namespace DiskConverter
                 }
                 catch { };
 
-                donebytes = donebytes + mediaInfo.Size;
-                double totalprocent = ((double)donebytes / (double)total)*100;
-                
+                donebytes = donebytes + new FileInfo(item).Length;
+                double totalprocent = ((double)donebytes / (double)total) * 100;
                 changeLabel(totalproglabel, totalprocent.ToString("0.00", new System.Globalization.CultureInfo("en-US", false)) + "%");
-                changeProgress(totalBar, (int)totalprocent);
+                changeProgress(totalBar, (int)totalprocent, false, false);
                 bezet[mytrem] = false;
+                changeProgress(progressbarnow, 0, true, false);
             }, maxDegreeOfParallelism: 5);
             var count = bag.Count;
 
             donebutton.Visible = true;
             
-            changeProgress(totalBar, 100);
+            changeProgress(totalBar, 100,false,false);
             changeLabel(currentFil, "Klaar.");
             MessageBox.Show("Schijf converteren is klaar");
 
