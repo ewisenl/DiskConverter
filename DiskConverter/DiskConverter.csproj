@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AsyncEnumerator" Version="4.0.2" />
+    <PackageReference Include="RoboSharp" Version="1.2.4" />
+    <PackageReference Include="System.Runtime.WindowsRuntime" Version="4.7.0" />
+    <PackageReference Include="Xabe.FFmpeg" Version="5.2.0" />
+    <PackageReference Include="Xabe.FFmpeg.Downloader" Version="5.2.0" />
+  </ItemGroup>
+
+</Project>
