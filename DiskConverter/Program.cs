@@ -16,11 +16,16 @@ namespace DiskConverter
 
         static void Main()
         {
+            
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
             Application.Run(new windowcase());
         }
+
+        
     }
+   
+
 }

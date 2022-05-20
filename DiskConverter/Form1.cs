@@ -10,7 +10,7 @@ using System.ComponentModel;
 using System.Collections;
 using System.Diagnostics;
 using Dasync.Collections;
-using RoboSharp;
+
 
 namespace DiskConverter
 {
@@ -23,14 +23,15 @@ namespace DiskConverter
         string target;
         long total = 1;
         long donebytes = 0;
-        CancellationTokenSource cancelsource = new();
+        public CancellationTokenSource cancelsource;
         
+
         
         List<string> movlist = new();
         public windowcase()
         {
             InitializeComponent();
-
+            cancelsource = new CancellationTokenSource();
             
 
            
@@ -39,6 +40,8 @@ namespace DiskConverter
 
 
         }
+
+        
         private bool changeLabel(Label requestedLabel, string text)
         {
             if (requestedLabel.InvokeRequired)
@@ -212,7 +215,7 @@ namespace DiskConverter
             RoboCommand roboCMD  = new();
             roboCMD.CopyOptions = copt;
             roboCMD.CopyOptions.CopySubdirectoriesIncludingEmpty = true;
-            roboCMD.SelectionOptions.ExcludeFiles = "*.mov *.pek *.BIN $*.* .*.*";
+            roboCMD.SelectionOptions.ExcludeFiles = "*.mov *.pek *.BIN $.*";
             roboCMD.SelectionOptions.ExcludeAttributes = "h";
             roboCMD.OnFileProcessed += currentCopyHanler;
             roboCMD.OnCopyProgressChanged += copyprogresHandler;
@@ -223,7 +226,7 @@ namespace DiskConverter
             
 
 
-            changeLabel(currentFil,"Done copying non-video files...");
+            changeLabel(currentFil,"Converting Prores to H.264");
 
             List<string> movque = new List<string>(Directory.GetFiles(source, "*.mov", SearchOption.AllDirectories).Where(name => !name.Contains("_Pling", StringComparison.OrdinalIgnoreCase) && !name.Contains("Pool", StringComparison.OrdinalIgnoreCase) && !name.Contains(" kort", StringComparison.OrdinalIgnoreCase)).ToArray());
             
@@ -232,7 +235,7 @@ namespace DiskConverter
             var bag = new System.Collections.Concurrent.ConcurrentBag<string>(movque);
              await bag.ParallelForEachAsync (async item =>
             {
-                changeLabel(currentFil, Path.GetDirectoryName(item));
+                
 
 
                 int mytrem = tremolo % 5;
@@ -259,12 +262,12 @@ namespace DiskConverter
                 
                 IMediaInfo mediaInfo = await FFmpeg.GetMediaInfo(item);
 
-                    IStream videoStream = (IStream)mediaInfo.VideoStreams.FirstOrDefault()
-                        ?.SetCodec(VideoCodec.h264);
-                    IStream audioStream = (IStream)mediaInfo.AudioStreams.FirstOrDefault()
-                        ?.SetCodec(AudioCodec.aac);
-                IConversion conversion =  convertMov(item, audioStream, videoStream);
+                    IStream videoStream = (IStream)mediaInfo.VideoStreams.FirstOrDefault()?.SetCodec(VideoCodec.h264);
 
+                IStream audioStream = (IStream)mediaInfo.AudioStreams.FirstOrDefault()?.SetCodec(AudioCodec.aac);
+
+                IConversion conversion =  convertMov(item, audioStream, videoStream);
+                
                 conversion.OnProgress += (sender, args) =>
                 {
                     var percent = (int)(Math.Round(args.Duration.TotalSeconds / args.TotalLength.TotalSeconds, 2) * 100);
@@ -274,15 +277,14 @@ namespace DiskConverter
 
 
 
-                try
-                {
-                    IConversionResult conversionResult = await conversion.Start(cancelsource.Token);
+                
+                    await conversion.Start(cancelsource.Token);
 
-                    bag.Add(conversionResult.ToString());
-                }
-                catch { };
+                    bag.Add(item);
 
-                donebytes = donebytes + new FileInfo(item).Length;
+
+
+                donebytes = donebytes + mediaInfo.Size;
                 double totalprocent = ((double)donebytes / (double)total) * 100;
                 changeLabel(totalproglabel, totalprocent.ToString("0.00", new System.Globalization.CultureInfo("en-US", false)) + "%");
                 changeProgress(totalBar, (int)totalprocent, false, false);
@@ -304,7 +306,7 @@ namespace DiskConverter
 
         IConversion convertMov(string vid, IStream audioStream, IStream videoStream) {
 
-
+            
 
 
             return FFmpeg.Conversions.New()
@@ -313,8 +315,6 @@ namespace DiskConverter
                 .SetPixelFormat(PixelFormat.yuv420p)
                 .SetOutputFormat(Format.mov)
                 .UseMultiThread(8)
-                .AddParameter("-bufsize 1000M")
-                .AddParameter(" -rtbufsize 1000M",ParameterPosition.PreInput)
                 .SetPreset(ConversionPreset.SuperFast)
                 .SetOutput(vid.Replace(Path.GetFullPath(source), Path.GetFullPath(target)));
 
