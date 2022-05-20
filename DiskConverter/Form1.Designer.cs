@@ -55,6 +55,8 @@
             this.currentproglabel = new System.Windows.Forms.Label();
             this.curdirlabel = new System.Windows.Forms.Label();
             this.totaalwordlabel = new System.Windows.Forms.Label();
+            this.etawordlabel = new System.Windows.Forms.Label();
+            this.etalabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // inputbutton
@@ -109,7 +111,7 @@
             // 
             // donebutton
             // 
-            this.donebutton.Location = new System.Drawing.Point(325, 409);
+            this.donebutton.Location = new System.Drawing.Point(687, 28);
             this.donebutton.Name = "donebutton";
             this.donebutton.Size = new System.Drawing.Size(94, 29);
             this.donebutton.TabIndex = 6;
@@ -300,11 +302,35 @@
             this.totaalwordlabel.Text = "Totaal";
             this.totaalwordlabel.Visible = false;
             // 
+            // etawordlabel
+            // 
+            this.etawordlabel.AutoSize = true;
+            this.etawordlabel.Font = new System.Drawing.Font("Segoe UI Semibold", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.etawordlabel.Location = new System.Drawing.Point(12, 399);
+            this.etawordlabel.Name = "etawordlabel";
+            this.etawordlabel.Size = new System.Drawing.Size(71, 17);
+            this.etawordlabel.TabIndex = 29;
+            this.etawordlabel.Text = "Estimated:";
+            this.etawordlabel.Visible = false;
+            // 
+            // etalabel
+            // 
+            this.etalabel.AutoSize = true;
+            this.etalabel.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            this.etalabel.Location = new System.Drawing.Point(89, 399);
+            this.etalabel.Name = "etalabel";
+            this.etalabel.Size = new System.Drawing.Size(74, 17);
+            this.etalabel.TabIndex = 30;
+            this.etalabel.Text = "estimating...";
+            this.etalabel.Visible = false;
+            // 
             // windowcase
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.etalabel);
+            this.Controls.Add(this.etawordlabel);
             this.Controls.Add(this.totaalwordlabel);
             this.Controls.Add(this.curdirlabel);
             this.Controls.Add(this.currentproglabel);
@@ -369,5 +395,7 @@
         private Label currentproglabel;
         private Label curdirlabel;
         private Label totaalwordlabel;
+        private Label etawordlabel;
+        private Label etalabel;
     }
 }

@@ -158,7 +158,7 @@ namespace DiskConverter
 
 
         private void copyprogresHandler(object sender, CopyProgressEventArgs args) { 
-            changeLabel(currentproglabel, args.CurrentFileProgress.ToString()+"%");  
+            changeLabel(currentproglabel, Math.Round(args.CurrentFileProgress,0).ToString()+"%");  
         }
 
         private void currentCopyHanler(object sender, FileProcessedEventArgs args)
@@ -182,7 +182,11 @@ namespace DiskConverter
 
         private async void convertbutton_Click(object sender, EventArgs e)
         {
+            etawordlabel.Visible = true;
+            
             convertbutton.Visible = false;
+            targetlabel.Visible = false;
+            
             inputbutton.Visible = false;
             targetbutton.Visible = false;
             currentFil.Visible = true;
@@ -223,7 +227,7 @@ namespace DiskConverter
             await roboCMD.Start();
 
 
-            
+
 
 
             changeLabel(currentFil,"Converting Prores to H.264");
@@ -306,7 +310,7 @@ namespace DiskConverter
 
         IConversion convertMov(string vid, IStream audioStream, IStream videoStream) {
 
-            
+
 
 
             return FFmpeg.Conversions.New()
@@ -315,6 +319,8 @@ namespace DiskConverter
                 .SetPixelFormat(PixelFormat.yuv420p)
                 .SetOutputFormat(Format.mov)
                 .UseMultiThread(8)
+                .AddParameter("-bufsize 1000M")
+                .AddParameter(" -rtbufsize 1000M",ParameterPosition.PreInput)
                 .SetPreset(ConversionPreset.SuperFast)
                 .SetOutput(vid.Replace(Path.GetFullPath(source), Path.GetFullPath(target)));
 
@@ -341,5 +347,7 @@ namespace DiskConverter
         {
 
         }
+
+       
     }
 }
