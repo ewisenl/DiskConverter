@@ -57,13 +57,15 @@
             this.totaalwordlabel = new System.Windows.Forms.Label();
             this.etawordlabel = new System.Windows.Forms.Label();
             this.etalabel = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // inputbutton
             // 
-            this.inputbutton.Location = new System.Drawing.Point(97, 28);
+            this.inputbutton.Location = new System.Drawing.Point(106, 12);
             this.inputbutton.Name = "inputbutton";
-            this.inputbutton.Size = new System.Drawing.Size(143, 29);
+            this.inputbutton.Size = new System.Drawing.Size(143, 45);
             this.inputbutton.TabIndex = 0;
             this.inputbutton.Text = "input folder";
             this.inputbutton.UseVisualStyleBackColor = true;
@@ -71,9 +73,9 @@
             // 
             // targetbutton
             // 
-            this.targetbutton.Location = new System.Drawing.Point(528, 28);
+            this.targetbutton.Location = new System.Drawing.Point(398, 12);
             this.targetbutton.Name = "targetbutton";
-            this.targetbutton.Size = new System.Drawing.Size(153, 29);
+            this.targetbutton.Size = new System.Drawing.Size(153, 45);
             this.targetbutton.TabIndex = 1;
             this.targetbutton.Text = "target folder";
             this.targetbutton.UseVisualStyleBackColor = true;
@@ -82,7 +84,7 @@
             // inputlabel
             // 
             this.inputlabel.AutoSize = true;
-            this.inputlabel.Location = new System.Drawing.Point(97, 60);
+            this.inputlabel.Location = new System.Drawing.Point(106, 60);
             this.inputlabel.Name = "inputlabel";
             this.inputlabel.Size = new System.Drawing.Size(13, 20);
             this.inputlabel.TabIndex = 2;
@@ -91,9 +93,10 @@
             // targetlabel
             // 
             this.targetlabel.AutoSize = true;
-            this.targetlabel.Location = new System.Drawing.Point(528, 60);
+            this.targetlabel.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.targetlabel.Location = new System.Drawing.Point(398, 60);
             this.targetlabel.Name = "targetlabel";
-            this.targetlabel.Size = new System.Drawing.Size(13, 20);
+            this.targetlabel.Size = new System.Drawing.Size(12, 17);
             this.targetlabel.TabIndex = 3;
             this.targetlabel.Text = " ";
             // 
@@ -123,7 +126,7 @@
             // 
             this.file1label.AutoSize = true;
             this.file1label.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.file1label.Location = new System.Drawing.Point(106, 284);
+            this.file1label.Location = new System.Drawing.Point(69, 284);
             this.file1label.Name = "file1label";
             this.file1label.Size = new System.Drawing.Size(0, 17);
             this.file1label.TabIndex = 8;
@@ -132,7 +135,7 @@
             // 
             this.file2label.AutoSize = true;
             this.file2label.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.file2label.Location = new System.Drawing.Point(106, 304);
+            this.file2label.Location = new System.Drawing.Point(69, 304);
             this.file2label.Name = "file2label";
             this.file2label.Size = new System.Drawing.Size(0, 17);
             this.file2label.TabIndex = 9;
@@ -141,7 +144,7 @@
             // 
             this.file3label.AutoSize = true;
             this.file3label.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.file3label.Location = new System.Drawing.Point(106, 324);
+            this.file3label.Location = new System.Drawing.Point(69, 324);
             this.file3label.Name = "file3label";
             this.file3label.Size = new System.Drawing.Size(0, 17);
             this.file3label.TabIndex = 10;
@@ -150,7 +153,7 @@
             // 
             this.file4label.AutoSize = true;
             this.file4label.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.file4label.Location = new System.Drawing.Point(106, 344);
+            this.file4label.Location = new System.Drawing.Point(69, 344);
             this.file4label.Name = "file4label";
             this.file4label.Size = new System.Drawing.Size(0, 17);
             this.file4label.TabIndex = 11;
@@ -159,7 +162,7 @@
             // 
             this.file5label.AutoSize = true;
             this.file5label.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.file5label.Location = new System.Drawing.Point(106, 364);
+            this.file5label.Location = new System.Drawing.Point(69, 364);
             this.file5label.Name = "file5label";
             this.file5label.Size = new System.Drawing.Size(0, 17);
             this.file5label.TabIndex = 12;
@@ -270,7 +273,7 @@
             // currentFil
             // 
             this.currentFil.AutoSize = true;
-            this.currentFil.Location = new System.Drawing.Point(97, 102);
+            this.currentFil.Location = new System.Drawing.Point(114, 104);
             this.currentFil.Name = "currentFil";
             this.currentFil.Size = new System.Drawing.Size(0, 20);
             this.currentFil.TabIndex = 25;
@@ -278,7 +281,7 @@
             // currentproglabel
             // 
             this.currentproglabel.AutoSize = true;
-            this.currentproglabel.Location = new System.Drawing.Point(97, 122);
+            this.currentproglabel.Location = new System.Drawing.Point(106, 125);
             this.currentproglabel.Name = "currentproglabel";
             this.currentproglabel.Size = new System.Drawing.Size(0, 20);
             this.currentproglabel.TabIndex = 26;
@@ -286,7 +289,7 @@
             // curdirlabel
             // 
             this.curdirlabel.AutoSize = true;
-            this.curdirlabel.Location = new System.Drawing.Point(97, 69);
+            this.curdirlabel.Location = new System.Drawing.Point(106, 104);
             this.curdirlabel.Name = "curdirlabel";
             this.curdirlabel.Size = new System.Drawing.Size(0, 20);
             this.curdirlabel.TabIndex = 27;
@@ -295,7 +298,7 @@
             // 
             this.totaalwordlabel.AutoSize = true;
             this.totaalwordlabel.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.totaalwordlabel.Location = new System.Drawing.Point(348, 156);
+            this.totaalwordlabel.Location = new System.Drawing.Point(358, 156);
             this.totaalwordlabel.Name = "totaalwordlabel";
             this.totaalwordlabel.Size = new System.Drawing.Size(46, 17);
             this.totaalwordlabel.TabIndex = 28;
@@ -324,11 +327,36 @@
             this.etalabel.Text = "estimating...";
             this.etalabel.Visible = false;
             // 
+            // button1
+            // 
+            this.button1.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.button1.Location = new System.Drawing.Point(742, 421);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(59, 28);
+            this.button1.TabIndex = 31;
+            this.button1.Text = "ffmpeg";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            this.checkBox1.Location = new System.Drawing.Point(756, 395);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(45, 21);
+            this.checkBox1.TabIndex = 32;
+            this.checkBox1.Text = "kill";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
             // windowcase
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.etalabel);
             this.Controls.Add(this.etawordlabel);
             this.Controls.Add(this.totaalwordlabel);
@@ -360,7 +388,6 @@
             this.Controls.Add(this.inputbutton);
             this.Name = "windowcase";
             this.Text = "Form1";
-            this.Load += new System.EventHandler(this.windowcase_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -397,5 +424,7 @@
         private Label totaalwordlabel;
         private Label etawordlabel;
         private Label etalabel;
+        private Button button1;
+        private CheckBox checkBox1;
     }
 }
