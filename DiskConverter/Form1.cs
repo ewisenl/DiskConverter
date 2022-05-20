@@ -22,8 +22,11 @@ namespace DiskConverter
         string localffmpeg = Environment.GetEnvironmentVariable("ffmpegpath",EnvironmentVariableTarget.User) ?? "-";
         string source;
         string target;
-        public bool kill = false;
+        public static bool kill = false;
+        public static bool onlymovs = false;
+        public static bool lowmovement = false;
         long total = 1;
+        long nonmovtotal = 0;
         long donebytes = 0;
         public CancellationTokenSource cancelsource;
         
@@ -79,61 +82,7 @@ namespace DiskConverter
         }
 
 
-        void Copy(string sourceDirectory, string targetDirectory)
-        {
-            DirectoryInfo diSource = new DirectoryInfo(sourceDirectory);
-            DirectoryInfo diTarget = new DirectoryInfo(targetDirectory);
-            changeLabel(currentFil, diSource.FullName);
-            CopyAll(diSource, diTarget);
-        }
-
-        void CopyAll(DirectoryInfo dirsource, DirectoryInfo dirtarget)
-        {
-            Directory.CreateDirectory(dirtarget.FullName);
-
-            // Copy each file into the new directory.
-            foreach (FileInfo fi in dirsource.GetFiles())
-            {
-                changeLabel(currentFil, fi.Name);
-
-
-
-                if (fi.Extension.Length != 4) { continue; };
-                    if (fi.Extension == ".MOV") { continue; };
-                    if (fi.Extension == ".mov") { continue; };
-                    if (fi.Extension == ".MXF") { continue; };
-                    if (fi.Extension == ".pek") { continue; };
-                    if (fi.Extension == ".PEK") { continue; };
-                    if (fi.Extension == ".bin") { continue; };
-                    if (fi.Extension == ".BIN") { continue; };
-                    if (fi.FullName.IndexOf("$RECYCLE.BIN") > -1) { continue; };
-                if (fi.FullName.IndexOf(" Volume ") > -1) { continue; };
-                if (File.Exists(fi.FullName.Replace(source,target))) { continue; };
-                
-                
-
-
-
-
-               
-
-
-                fi.CopyTo(Path.Combine(dirtarget.FullName, fi.Name), true);
-            }
-
-            // Copy each subdirectory using recursion.
-            foreach (DirectoryInfo diSourceSubDir in dirsource.GetDirectories())
-            {
-                if (diSourceSubDir.Name.IndexOf("RECYCLE") > -1) { continue; };
-                if (diSourceSubDir.Name.IndexOf("FOUND.") > -1) { continue; };
-                if (diSourceSubDir.Name.IndexOf("Volume ") > -1) { continue; };
-                changeLabel(currentFil, diSourceSubDir.Name);
-                
-                DirectoryInfo nextTargetSubDir =
-                    dirtarget.CreateSubdirectory(diSourceSubDir.Name);
-                CopyAll(diSourceSubDir, nextTargetSubDir);
-            }
-        }
+        
         private void imputbutton_Click(object sender, EventArgs e)
         {
             using (var fbd = new FolderBrowserDialog()) {
@@ -196,7 +145,6 @@ namespace DiskConverter
             convertbutton.Visible = false;
             targetlabel.Visible = false;
             totaalwordlabel.Visible = true;
-            inputbutton.Visible = false;
             targetbutton.Visible = false;
             currentFil.Visible = true;
             bool[] bezet = new bool[5] { false, false, false, false, false };
@@ -214,7 +162,10 @@ namespace DiskConverter
                 Path.GetExtension(name) == ".pek" 
                 ).ToArray());
             Thread.Sleep(300);
-            await foreach (string file in bigfiles) { total += new FileInfo(file).Length; if (Path.GetExtension(file) == ".mp4") { mp4bytes+= new FileInfo(file).Length; }; };
+            await foreach (string file in bigfiles) { total += new FileInfo(file).Length; 
+                if (Path.GetExtension(file) == ".mp4") { mp4bytes+= new FileInfo(file).Length; }; 
+                if (Path.GetExtension(file) != ".mov") { nonmovtotal += new FileInfo(file).Length; }; 
+            };
        
 
             
@@ -233,15 +184,19 @@ namespace DiskConverter
             roboCMD.OnFileProcessed += currentCopyHanler;
             roboCMD.OnCopyProgressChanged += copyprogresHandler;
             roboCMD.OnCommandCompleted += copyFileFinishHandler;
-            await roboCMD.Start();
+            if (!onlymovs)
+            {
+                await roboCMD.Start();
+            }
 
             progressBar1.Visible = true;
             progressBar2.Visible = true;
             progressBar3.Visible = true;
             progressBar4.Visible = true;
             progressBar5.Visible = true;
+            etalabel.Visible = true;
             DateTime _starttime = DateTime.Now;
-
+            donebytes = nonmovtotal;
 
             changeLabel(currentFil,"Converting Prores to H.264");
             changeLabel(currentproglabel," ");
@@ -255,7 +210,7 @@ namespace DiskConverter
             {
                 Thread.Sleep(100);
 
-
+                
                 int mytrem = tremolo % 5;
                 
                 
@@ -280,11 +235,18 @@ namespace DiskConverter
                 
                 IMediaInfo mediaInfo = await FFmpeg.GetMediaInfo(item);
 
-                    IStream videoStream = (IStream)mediaInfo.VideoStreams.FirstOrDefault()?.SetCodec(VideoCodec.h264);
+                if (File.Exists(item.Replace(Path.GetFullPath(source), Path.GetFullPath(target))))
+                {
+                    donebytes = donebytes + mediaInfo.Size;
+                    return;
 
-                IStream audioStream = (IStream)mediaInfo.AudioStreams.FirstOrDefault()?.SetCodec(AudioCodec.aac);
+                };
 
-                IConversion conversion =  convertMov(item, audioStream, videoStream);
+                IStream videoStream = (IStream)mediaInfo.VideoStreams.FirstOrDefault()?.SetCodec(VideoCodec.hevc);
+
+                IStream audioStream = (IStream)mediaInfo.AudioStreams.FirstOrDefault()?.SetCodec(AudioCodec.aac).SetChannels(2);
+
+                IConversion conversion = convertMov(item, audioStream, videoStream);
                 
                 conversion.OnProgress += (sender, args) =>
                 {
@@ -306,13 +268,15 @@ namespace DiskConverter
 
 
 
-                donebytes = donebytes + new FileInfo(item).Length;
+                donebytes = donebytes + mediaInfo.Size;
                 double totalprocent = ((double)donebytes / (double)total) * 100;
                 double mp4totalprocent = ((double)donebytes-mp4bytes / (double)total- mp4bytes) * 100;
-                TimeSpan estimated = TimeSpan.FromSeconds((double)(100.00 / mp4totalprocent) * (double)conversionResult.EndTime.Subtract(_starttime).TotalSeconds);
+                //TimeSpan estimated = TimeSpan.FromSeconds((double)(100.00 / mp4totalprocent) * (double)conversionResult.EndTime.Subtract(conversionResult.StartTime).TotalSeconds);
+                long bytespersecond = (long)mediaInfo.Size /(long)conversionResult.EndTime.Subtract(conversionResult.StartTime).TotalSeconds;
+                TimeSpan estimated = TimeSpan.FromSeconds(((long)(total - donebytes - mp4bytes) / bytespersecond)/4);
                 if (estimated.TotalSeconds > 0)
                 {
-                    changeLabel(etalabel, Math.Floor(estimated.TotalHours) + " uur, " + estimated.Minutes + " minuten...");
+                    changeLabel(etalabel, Math.Floor(estimated.TotalHours) + " uur, " + estimated.Minutes + " minuten...   Speed: "+Math.Round((double)(conversionResult.Duration.TotalSeconds/mediaInfo.Duration.TotalSeconds),2).ToString() + "×");
                 };
                 changeLabel(totalproglabel, totalprocent.ToString("0.00", new System.Globalization.CultureInfo("en-US", false)) + "%");
                 changeProgress(totalBar, (int)totalprocent, false, false);
@@ -330,24 +294,26 @@ namespace DiskConverter
 
         }
 
-        
+
 
 
         IConversion convertMov(string vid, IStream audioStream, IStream videoStream) {
 
+           // return FFmpeg.Conversions(vid, vid.Replace(Path.GetFullPath(source), Path.GetFullPath(target)));
 
-            Thread.Sleep(30);
+
 
             return FFmpeg.Conversions.New()
+                
                 .AddStream(audioStream, videoStream)
-                .SetPriority(ProcessPriorityClass.BelowNormal)
+                .SetPriority(ProcessPriorityClass.Normal)
                 .SetPixelFormat(PixelFormat.yuv420p)
                 .AddParameter("-tune fastdecode")
-                .AddParameter("-g 15")
-                .AddParameter("-crf 12")
+                .SetPreset(ConversionPreset.VeryFast)
+                .AddParameter("-g 10 -c:v h264 ")
+                .AddParameter("-crf 21 -threads 5")
+                .AddParameter(" -hwaccel_device 1 -hwaccel auto", ParameterPosition.PreInput)
                 .SetOutputFormat(Format.mov)
-                .UseMultiThread(8)
-                .SetPreset(ConversionPreset.SuperFast)
                 .SetOutput(vid.Replace(Path.GetFullPath(source), Path.GetFullPath(target)));
 
 
@@ -397,6 +363,16 @@ namespace DiskConverter
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             kill = !kill;
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            onlymovs = !onlymovs;
+        }
+
+        private void checkBox3_CheckedChanged(object sender, EventArgs e)
+        {
+            lowmovement = !lowmovement;
         }
     }
 }
