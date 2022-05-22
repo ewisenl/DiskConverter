@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.Collections;
 using System.Diagnostics;
 using Dasync.Collections;
+using System.Text.RegularExpressions;
 
 
 namespace DiskConverter
@@ -18,6 +19,7 @@ namespace DiskConverter
 
     public partial class windowcase : Form
     {
+
         string ffmpeg = "C:\\ProgramData\\chocolatey\\lib\\ffmpeg\\tools\\ffmpeg\\bin\\";
         string localffmpeg = Environment.GetEnvironmentVariable("ffmpegpath",EnvironmentVariableTarget.User) ?? "-";
         string source;
@@ -36,6 +38,7 @@ namespace DiskConverter
         public windowcase()
         {
             InitializeComponent();
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Text = "EWISE Prores - h.264 converter";
             cancelsource = new CancellationTokenSource();
             if (localffmpeg != "-" && localffmpeg != null && localffmpeg != "") {
@@ -50,7 +53,10 @@ namespace DiskConverter
             //FFmpegDownloader.GetLatestVersion(FFmpegVersion ffmpegVersion)
             FFmpeg.SetExecutablesPath("C:\\ProgramData\\chocolatey\\lib\\ffmpeg\\tools\\ffmpeg\\bin");
             };
+            new Task(async() => { Thread.Sleep(2300);
+                try { pictureBox3.BeginInvoke((MethodInvoker)delegate () { pictureBox3.Visible = false; }); } catch { };
 
+            }).Start();
         }
 
         
@@ -90,10 +96,15 @@ namespace DiskConverter
                 if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
 
                 {
-                    source = Path.GetFullPath(fbd.SelectedPath).TrimEnd(Path.DirectorySeparatorChar);
+                    source = Path.TrimEndingDirectorySeparator(Path.GetFullPath(fbd.SelectedPath));
                     source = source +Path.DirectorySeparatorChar;
+                    source.Replace("\\\\", "\\");
                     inputlabel.Text = source;
                     if (target != null) { convertbutton.Visible = true; };
+                    string regexstr = "/20[1-9][1-9][aA-zZ]*/";
+                    if (new Regex(regexstr).Match(fbd.SelectedPath).Success) { string schijf = new Regex(regexstr).Match(fbd.SelectedPath).Value;
+                        schijfgiant.Text = schijf;
+                    };
                 }
             }
         }
@@ -106,10 +117,17 @@ namespace DiskConverter
                 if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
 
                 {
-                    target = Path.GetFullPath(fbd.SelectedPath).TrimEnd(Path.DirectorySeparatorChar);
-                    target = target + Path.DirectorySeparatorChar;
+                    target = Path.GetFullPath(fbd.SelectedPath).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar; 
+                    
+                    
                     targetlabel.Text = target;
                     if (source != null) { convertbutton.Visible = true; };
+                    string regexstr = "20[1-9][1-9][aA-zZ]";
+                    if (new Regex(regexstr).Match(fbd.SelectedPath).Success)
+                    {
+                        string schijf = new Regex(regexstr).Match(fbd.SelectedPath).Value;
+                        schijfgiant.Text = schijf;
+                    };
                 }
             }
         }
@@ -140,14 +158,15 @@ namespace DiskConverter
 
         private async void convertbutton_Click(object sender, EventArgs e)
         {
+            currentFil.Text = "Calculating...";
             etawordlabel.Visible = true;
-            
+            inputbutton.Visible = false;
             convertbutton.Visible = false;
-            targetlabel.Visible = false;
+            targetlabel.Visible = true;
             totaalwordlabel.Visible = true;
             targetbutton.Visible = false;
             currentFil.Visible = true;
-            bool[] bezet = new bool[5] { false, false, false, false, false };
+            Semaphore semaphoreObject = new Semaphore(initialCount: 0, maximumCount: 5);
             changeLabel(currentFil, "Copying folders and small files...");
             long mp4bytes = 0;
             
@@ -189,33 +208,41 @@ namespace DiskConverter
                 await roboCMD.Start();
             }
 
-            progressBar1.Visible = true;
-            progressBar2.Visible = true;
-            progressBar3.Visible = true;
-            progressBar4.Visible = true;
-            progressBar5.Visible = true;
+
+
+
+            ProgressBar[] progressbars = {
+                progressBar1,
+                progressBar2,
+                progressBar3,
+                progressBar4,
+                progressBar5
+            };
+
+
+
+            
             etalabel.Visible = true;
             DateTime _starttime = DateTime.Now;
             donebytes = nonmovtotal;
 
-            changeLabel(currentFil,"Converting Prores to H.264");
+            changeLabel(currentFil,"Converting...");
             changeLabel(currentproglabel," ");
 
             List<string> movque = new List<string>(Directory.GetFiles(source, "*.mov", SearchOption.AllDirectories).Where(name => !name.Contains("_Pling", StringComparison.OrdinalIgnoreCase) && !name.Contains("Pool", StringComparison.OrdinalIgnoreCase) && !name.Contains(" kort", StringComparison.OrdinalIgnoreCase)).ToArray());
             
             
-            int tremolo = 0;
+            
             var bag = new System.Collections.Concurrent.ConcurrentBag<string>(movque);
+            
              await bag.ParallelForEachAsync (async item =>
             {
-                Thread.Sleep(100);
+                
 
                 
-                int mytrem = tremolo % 5;
-                
-                
-                tremolo++;
-                for (var b = 0; b < 5; b++) { if (bezet[b] == false) { bezet[b] = true; mytrem = b; break; }; };
+                int mytrem = -1;
+                foreach (ProgressBar pb in progressbars) { Thread.Sleep(10);  mytrem++; if (pb.Visible == false) { changeProgress(pb,0,true,true); break; }; };
+               
 
                 Label filelabel = file1label;
                 Label proglabel = proglabel1;
@@ -281,8 +308,11 @@ namespace DiskConverter
                 changeLabel(totalproglabel, totalprocent.ToString("0.00", new System.Globalization.CultureInfo("en-US", false)) + "%");
                 changeProgress(totalBar, (int)totalprocent, false, false);
            
-            bezet[mytrem] = false;
+                
                 changeProgress(progressbarnow, 0, true, false);
+                changeProgress(progressbars[mytrem], 0, true, false);
+
+
             }, maxDegreeOfParallelism: 5);
             var count = bag.Count;
 
@@ -306,12 +336,12 @@ namespace DiskConverter
             return FFmpeg.Conversions.New()
                 
                 .AddStream(audioStream, videoStream)
-                .SetPriority(ProcessPriorityClass.Normal)
-                .SetPixelFormat(PixelFormat.yuv420p)
+                .SetPriority(ProcessPriorityClass.BelowNormal)
+                .SetPixelFormat(PixelFormat.yuv420p10le)
                 .AddParameter("-tune fastdecode")
                 .SetPreset(ConversionPreset.VeryFast)
-                .AddParameter("-g 10 -c:v h264 ")
-                .AddParameter("-crf 21 -threads 5")
+                .AddParameter("-g 10 -c:v h264 -ac 2 ")
+                .AddParameter("-crf 24 -threads 5")
                 .AddParameter(" -hwaccel_device 1 -hwaccel auto", ParameterPosition.PreInput)
                 .SetOutputFormat(Format.mov)
                 .SetOutput(vid.Replace(Path.GetFullPath(source), Path.GetFullPath(target)));
@@ -373,6 +403,21 @@ namespace DiskConverter
         private void checkBox3_CheckedChanged(object sender, EventArgs e)
         {
             lowmovement = !lowmovement;
+        }
+
+        private void pictureBox3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pictureBox3_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void targetlabel_Click(object sender, EventArgs e)
+        {
+            Process.Start("explorer.exe", @targetlabel.Text);
         }
     }
 }
